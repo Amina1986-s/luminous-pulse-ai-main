@@ -26,6 +26,10 @@ const fadeUp: Variants = {
   hidden: { opacity: 0, y: 40, filter: "blur(20px)" },
   show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const } },
 };
+const fadeRight: Variants = {
+  hidden: { opacity: 0, x: -24, filter: "blur(18px)" },
+  show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const } },
+};
 const stagger: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
@@ -67,7 +71,7 @@ function MagneticButton({
       className={`group ${base} ${styles} ${className}`}
     >
       {variant === "primary" && (
-        <span className="absolute inset-0 -z-10" style={{ background: "var(--gradient-primary)" }} />
+        <span className="absolute inset-0 -z-10 animate-soft-pulse" style={{ background: "var(--gradient-primary)" }} />
       )}
       {variant === "primary" && (
         <motion.span
@@ -150,13 +154,16 @@ function Nav() {
           <span className="h-7 w-7 rounded-full" style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }} />
           <span className="text-gradient">NOVA</span>
         </a>
-        <nav className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
+        <motion.nav initial="hidden" animate="show" variants={stagger} className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
           {["Services", "Work", "Process", "Pricing", "Contact"].map((l) => (
-            <a key={l} href={`#${l.toLowerCase()}`} className="relative hover:text-foreground transition-colors">
+            <motion.a key={l} href={`#${l.toLowerCase()}`} variants={fadeRight}
+              whileHover={{ y: -2, scale: 1.02 }}
+              className="relative hover:text-foreground transition-colors"
+            >
               {l}
-            </a>
+            </motion.a>
           ))}
-        </nav>
+        </motion.nav>
         <MagneticButton onClick={() => setOpen(true)}>
           Start a Project <ArrowRight className="h-4 w-4" />
         </MagneticButton>
@@ -323,9 +330,10 @@ function Logos() {
         <div className="absolute inset-y-0 right-0 w-32 z-10" style={{ background: "linear-gradient(-90deg, var(--background), transparent)" }} />
         <div className="flex gap-16 animate-marquee whitespace-nowrap hover:[animation-play-state:paused]">
           {[...logos, ...logos].map((l, i) => (
-            <span key={i} className="font-heading text-3xl text-muted-foreground/60 hover:text-gradient transition-colors">
+            <motion.span key={i} whileHover={{ y: -3, scale: 1.03 }} whileTap={{ scale: 0.98 }}
+              className="font-heading text-3xl text-muted-foreground/60 hover:text-gradient transition-colors">
               {l}
-            </span>
+            </motion.span>
           ))}
         </div>
       </div>
@@ -410,10 +418,12 @@ function Portfolio() {
   return (
     <Section id="work" eyebrow="Selected work" title={<>Bento of <span className="text-gradient italic">recent obsessions</span></>}>
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 auto-rows-[18rem]">
-        {works.map((w) => (
+        {works.map((w, i) => (
           <motion.button
             key={w.t}
-            variants={fadeUp}
+            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: i * 0.1, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
             whileHover={{ scale: 1.02, rotateX: 2, rotateY: -2 }}
             onClick={() => setActive(w)}
             className={`group relative ${w.span} ${w.h} rounded-3xl overflow-hidden glass text-left border-gradient`}
@@ -516,7 +526,12 @@ function Testimonials() {
         <motion.div className="flex gap-6 cursor-grab active:cursor-grabbing"
           drag="x" dragConstraints={{ left: -1200, right: 0 }}>
           {items.map((t, i) => (
-            <motion.div key={i} whileHover={{ y: -6 }}
+            <motion.div key={i}
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ delay: i * 0.08, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -6 }}
               className="min-w-[340px] sm:min-w-[420px] glass rounded-3xl p-8 border-gradient">
               <Quote className="h-8 w-8 text-primary mb-4" />
               <p className="text-lg leading-relaxed mb-6">"{t.q}"</p>
@@ -568,8 +583,12 @@ function Pricing() {
   return (
     <Section id="pricing" eyebrow="Pricing" title={<>Three ways to <span className="text-gradient italic">work with us</span></>}>
       <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-        {plans.map((p) => (
-          <motion.div key={p.n} variants={fadeUp}
+        {plans.map((p, i) => (
+          <motion.div key={p.n}
+            initial={{ opacity: 0, y: 28, scale: 0.98 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ delay: i * 0.1, duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
             whileHover={{ y: -10, scale: 1.02 }}
             className={`relative glass-strong rounded-3xl p-8 ${p.pop ? "animate-pulse-glow border-gradient" : "border border-white/10"}`}
             style={p.pop ? { background: "linear-gradient(135deg, oklch(0.72 0.27 350 / 0.12), oklch(0.55 0.25 290 / 0.08))" } : {}}
@@ -613,7 +632,7 @@ function FAQ() {
     <Section eyebrow="Questions" title={<>Things we're <span className="text-gradient italic">often asked</span></>}>
       <div className="max-w-3xl mx-auto space-y-3">
         {items.map((it, i) => (
-          <motion.div key={i} variants={fadeUp} className="glass rounded-2xl overflow-hidden">
+          <motion.div key={i} variants={fadeUp} whileHover={{ scale: 1.01 }} className="glass rounded-2xl overflow-hidden">
             <button onClick={() => setOpen(open === i ? null : i)} className="w-full flex items-center justify-between p-6 text-left">
               <span className="font-heading text-xl">{it.q}</span>
               {open === i ? <Minus className="h-5 w-5 text-primary" /> : <Plus className="h-5 w-5 text-primary" />}
